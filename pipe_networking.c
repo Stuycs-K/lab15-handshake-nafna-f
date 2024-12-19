@@ -1,24 +1,29 @@
 #include "pipe_networking.h"
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <errno.h>
-#include <stdio.h>
 //UPSTREAM = to the server / from the client
 //DOWNSTREAM = to the client / from the server
 /*=========================
   server_setup
 
-  creates the WKP and opens it, waiting for a  connection.
+  creates the WKP and opens it, waiting for a connection.
   removes the WKP once a connection has been made
 
   returns the file descriptor for the upstream pipe.
   =========================*/
 int server_setup() {
   int from_client = 0;
-  if (mkfifo("WKP", 0650) == -1){ //create the well known pipe (WKP)
-    printf("wkp mkfifo error: %d: %s\nreturning -1\n", errno, strerror(errno));
+  //creating the well known pipe (WKP)
+  if (mkfifo("WKP", 0650) == -1){
+    printf("server_setup: wkp mkfifo error: %d: %s\nreturning -1\n", errno, strerror(errno));
     return -1;
   }
+  printf("server_setup: wkp created\nopening wkp for read, hanging until connection\n");
+  //opening the well known pipe (WKP) - read only
+  int fd = open("WKP", O_RDONLY); //blocks until write mode is opened
+  if (fd == -1){
+      printf("server_setup: wkp open error: %d: %s\nreturning -1\n", errno, strerror(errno));
+      return -1;
+  }
+  printf("server_setup: wkp successfully connected\n");
   return from_client;
 }
 
@@ -49,6 +54,16 @@ int server_handshake(int *to_client) {
   =========================*/
 int client_handshake(int *to_server) {
   int from_server;
+  //create private pipe (pp)
+  int pp[2];
+  pipe(pp);
+  printf("client_handshake: pp created\nopening wkp\n");
+  int fd = open("WKP", O_WRONLY); //should unblock both ends
+  if (fd == -1){
+      printf("client_handshake: wkp open error: %d: %s\nreturning -1\n", errno, strerror(errno));
+      return -1;
+  }
+  printf("client_handshake: wkp successfully connected\n");
   return from_server;
 }
 
