@@ -1,4 +1,8 @@
 #include "pipe_networking.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <stdio.h>
 //UPSTREAM = to the server / from the client
 //DOWNSTREAM = to the client / from the server
 /*=========================
@@ -11,11 +15,15 @@
   =========================*/
 int server_setup() {
   int from_client = 0;
+  if (mkfifo("WKP", 0650) == -1){ //create the well known pipe (WKP)
+    printf("wkp mkfifo error: %d: %s\nreturning -1\n", errno, strerror(errno));
+    return -1;
+  }
   return from_client;
 }
 
 /*=========================
-  server_handshake 
+  server_handshake
   args: int * to_client
 
   Performs the server side pipe 3 way handshake.
@@ -25,10 +33,11 @@ int server_setup() {
   =========================*/
 int server_handshake(int *to_client) {
   int from_client;
+  server_setup();
   return from_client;
 }
 
-
+// christmas is just in a week! woo hoo! it got here so fast! i am so happy about this information
 /*=========================
   client_handshake
   args: int * to_server
@@ -56,5 +65,3 @@ int server_connect(int from_client) {
   int to_client  = 0;
   return to_client;
 }
-
-
