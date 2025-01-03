@@ -23,7 +23,8 @@ int server_setup() {
       printf("server_setup: wkp open error: %d: %s\nreturning -1\n", errno, strerror(errno));
       return -1;
   }
-  printf("server_setup: wkp successfully connected\n");
+  printf("server_setup: wkp successfully connected\ndeleting wkp descriptor...\n");
+  
   return from_client;
 }
 
@@ -69,6 +70,7 @@ int client_handshake(int *to_server) {
       return -1;
   }
   printf("client_handshake: wkp successfully connected\nwriting pp to wkp\n");
+  write(fd, pidC, 6); //write the private pipe to the wkp
   //write pp to wkp
   return from_server;
 }
