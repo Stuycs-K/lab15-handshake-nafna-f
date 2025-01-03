@@ -42,7 +42,6 @@ int server_handshake(int *to_client) {
   return from_client;
 }
 
-// christmas is just in a week! woo hoo! it got here so fast! i am so happy about this information
 /*=========================
   client_handshake
   args: int * to_server
@@ -54,16 +53,23 @@ int server_handshake(int *to_client) {
   =========================*/
 int client_handshake(int *to_server) {
   int from_server;
-  //create private pipe (pp)
-  int pp[2];
-  pipe(pp);
+  //grab pid
+  int pid = getpid();
+  char * pidC = malloc(6);
+  sprintf(pidC, "%d", pid);
+  //create named private pipe (name is client pid)
+  if (mkfifo(pidC, 0650) == -1){
+    printf("client_handshake: pid mkfifo error: %d: %s\nreturning -1\n", errno, strerror(errno));
+    return -1;
+  }
   printf("client_handshake: pp created\nopening wkp\n");
   int fd = open("WKP", O_WRONLY); //should unblock both ends
   if (fd == -1){
       printf("client_handshake: wkp open error: %d: %s\nreturning -1\n", errno, strerror(errno));
       return -1;
   }
-  printf("client_handshake: wkp successfully connected\n");
+  printf("client_handshake: wkp successfully connected\nwriting pp to wkp\n");
+  //write pp to wkp
   return from_server;
 }
 
